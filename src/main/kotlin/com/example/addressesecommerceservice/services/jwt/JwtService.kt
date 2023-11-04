@@ -15,10 +15,7 @@ import java.util.*
 import kotlin.collections.HashMap
 
 @Service
-class JwtService(
-        environment: Environment,
-        private val userService: UserService
-) {
+class JwtService(environment: Environment) {
 
     private val jwtSecretKey = environment.getProperty(JWT_SECRET_ENV_PROPERTY)?.let {
         Keys.hmacShaKeyFor(Decoders.BASE64.decode(it))

@@ -8,15 +8,18 @@ import com.example.addressesecommerceservice.services.addresses.erros.MaxUserSav
 import com.example.addressesecommerceservice.services.users.erros.InvalidUsernameException
 import com.example.addressesecommerceservice.services.users.erros.UserNotFoundException
 import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.security.SecurityException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 
 @ControllerAdvice
-class AppControllerAdvice {
+class AppControllerAdvice: ResponseEntityExceptionHandler() {
     @ExceptionHandler
     fun genericExceptionHandler(exception: Exception): ResponseEntity<GenericErrorDto> {
         LoggerFactory.getLogger("GenericExceptionLog").error(exception.message, exception)
@@ -80,6 +83,26 @@ class AppControllerAdvice {
     )
 
     @ExceptionHandler
+    fun maxUserSavedAddressesLimitExceedException(
+            exception: MaxUserSavedAddressesLimitExceedException
+    ) = ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            GenericErrorDto(
+                    statusCode = HttpStatus.BAD_REQUEST.value(),
+                    errorMessage = exception.message
+            )
+    )
+
+    @ExceptionHandler
+    fun badCredentialsExceptionHandler(
+            exception: BadCredentialsException
+    ) = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+            GenericErrorDto(
+                    statusCode = HttpStatus.UNAUTHORIZED.value(),
+                    errorMessage = "Usuário ou senha inválidos"
+            )
+    )
+
+    @ExceptionHandler
     fun expiredJwtExceptionHandler(exception: ExpiredJwtException) = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
             GenericErrorDto(
                     statusCode = HttpStatus.UNAUTHORIZED.value(),
@@ -88,12 +111,10 @@ class AppControllerAdvice {
     )
 
     @ExceptionHandler
-    fun maxUserSavedAddressesLimitExceedException(
-            exception: MaxUserSavedAddressesLimitExceedException
-    ) = ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+    fun jwtSecurityExceptionHandler(exception: SecurityException) = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
             GenericErrorDto(
-                    statusCode = HttpStatus.BAD_REQUEST.value(),
-                    errorMessage = exception.message
+                    statusCode = HttpStatus.UNAUTHORIZED.value(),
+                    errorMessage = "Token inválido"
             )
     )
 }

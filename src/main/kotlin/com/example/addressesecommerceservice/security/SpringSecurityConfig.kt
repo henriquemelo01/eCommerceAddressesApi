@@ -37,7 +37,7 @@ class SpringSecurityDependenciesContainer {
 @EnableWebSecurity
 class SpringSecurityConfig(
         private val authenticationProvider: AuthenticationProvider,
-        private val jwtAuthFilter: JwtAuthFilter
+        private val jwtAuthFilter: JwtAuthFilter,
 ) {
     @Bean
     fun securityFilterChain(
@@ -47,7 +47,9 @@ class SpringSecurityConfig(
             .and()
             .csrf { it.disable() }
             .authorizeHttpRequests {
-                it.anyRequest().permitAll()
+                it.antMatchers("/ecommerce-address-api/v1/auth/**").permitAll()
+                it.antMatchers("/ping").permitAll()
+                it.anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
             .authenticationProvider(authenticationProvider)

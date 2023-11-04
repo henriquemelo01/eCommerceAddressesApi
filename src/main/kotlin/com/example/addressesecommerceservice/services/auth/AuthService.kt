@@ -19,15 +19,10 @@ import org.springframework.stereotype.Service
 class AuthService(
         private val userRepository: UserRepository,
         private val userAddressRepository: UserAddressRepository,
-        private val jwtService: JwtService
+        private val jwtService: JwtService,
+        private val passwordEncoder: PasswordEncoder,
+        private val authenticationManager: AuthenticationManager
 ) {
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
-
-    @Autowired
-    private lateinit var authenticationManager: AuthenticationManager
-
     fun registerNewUser(registerUserDto: RegisterUserDto): String {
 
         val (email, password, accountAddress) = registerUserDto
@@ -48,8 +43,6 @@ class AuthService(
                 )
         )
 
-        LoggerFactory.getLogger("registerNewUser").info("created user id: ${createdUser.id}")
-
         return jwtService.generateJwt(createdUser)
     }
 
@@ -64,6 +57,4 @@ class AuthService(
 
         return jwtService.generateJwt(foundedUser)
     }
-
-
 }
